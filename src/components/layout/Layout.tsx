@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Sidebar from  './Sidebar';
-import { Menu } from 'lucide-react';
+import { Menu, Bell, Calendar, Clock } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +19,34 @@ const Layout: React.FC<LayoutProps> = ({ children, activeRoute, onNavigate }) =>
     setSidebarOpen(false);
   };
 
+  // Obter data e hora atual
+  const getCurrentDate = () => {
+    const date = new Date();
+    return date.toLocaleDateString('pt-BR', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const getCurrentTime = () => {
+    return new Date().toLocaleTimeString('pt-BR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const [currentTime, setCurrentTime] = useState(getCurrentTime());
+
+  // Atualizar hora a cada minuto
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(getCurrentTime());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar 
@@ -29,37 +57,90 @@ const Layout: React.FC<LayoutProps> = ({ children, activeRoute, onNavigate }) =>
       />
       
       <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow-sm z-10">
-          <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-secondary hover:text-secondary-dark hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary lg:hidden"
-              onClick={toggleSidebar}
-            >
-              <span className="sr-only">Abrir menu</span>
-              <Menu className="h-6 w-6" />
-            </button>
-            <div className="flex-1 flex justify-center lg:justify-end">
-              <div className="max-w-lg w-full">
-                <div className="text-right">
-                  <span className="inline-block bg-accent/10 rounded-full px-3 py-1 text-sm font-semibold text-accent">
-                    Administrador
-                  </span>
+        {/* Header Aprimorado */}
+        <header className="bg-white shadow-sm z-10 border-b border-gray-100">
+          <div className="px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              {/* Menu Mobile e Busca */}
+              <div className="flex items-center flex-1">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center p-2.5 rounded-lg text-secondary hover:text-secondary-dark hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary lg:hidden"
+                  onClick={toggleSidebar}
+                >
+                  <span className="sr-only">Abrir menu</span>
+                  <Menu className="h-6 w-6" />
+                </button>
+                
+              </div>
+
+              {/* Informações e Ações */}
+              <div className="flex items-center space-x-4">
+                {/* Data e Hora */}
+                <div className="hidden lg:flex items-center space-x-4 text-sm text-gray-600">
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-1 text-blue-500" />
+                    <span className="capitalize">{getCurrentDate()}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 mr-1 text-blue-500" />
+                    <span>{currentTime}</span>
+                  </div>
+                </div>
+
+                {/* Badge do Usuário */}
+                <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full pl-4 pr-5 py-2">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                    <span className="text-white font-semibold text-sm">A</span>
+                  </div>
+                  <div className="hidden sm:block">
+                    <p className="text-sm font-semibold text-gray-800">Administrador</p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            
           </div>
         </header>
         
-        <main className="flex-1 overflow-auto">
+        {/* Breadcrumb */}
+        <div className="bg-gray-50 px-4 sm:px-6 lg:px-8 py-3 border-b border-gray-200">
+          <nav className="flex items-center text-sm">
+            <span className="text-gray-500">Sistema</span>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-primary font-medium capitalize">{activeRoute.replace('-', ' ')}</span>
+          </nav>
+        </div>
+        
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto bg-gray-50">
           <div className="py-6 px-4 sm:px-6 lg:px-8">
-            {children}
+            <div className="animate-fadeIn">
+              {children}
+            </div>
           </div>
         </main>
         
-        <footer className="bg-white shadow-sm mt-auto">
-          <div className="px-4 sm:px-6 lg:px-8 py-3 text-center text-sm text-gray-500">
-            Sistema de Gestão de Inventário © {new Date().getFullYear()}
+        {/* Footer Aprimorado */}
+        <footer className="bg-white border-t border-gray-200">
+          <div className="px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between">
+              <div className="text-sm text-gray-500 mb-2 sm:mb-0">
+                Sistema de Controle de Patrimônio TI © {new Date().getFullYear()}
+              </div>
+              <div className="flex items-center space-x-4 text-sm">
+                <span className="text-gray-500">Versão 2.0.1</span>
+                <span className="text-gray-300">|</span>
+                <a href="#" className="text-blue-500 hover:text-blue-600 transition-colors">
+                  Suporte
+                </a>
+                <span className="text-gray-300">|</span>
+                <a href="#" className="text-blue-500 hover:text-blue-600 transition-colors">
+                  Documentação
+                </a>
+              </div>
+            </div>
           </div>
         </footer>
       </div>

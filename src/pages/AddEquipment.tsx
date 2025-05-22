@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { Equipment } from '../types';
-import Card from '../components/common/Card';
 import Button from '../components/common/Button';
-import { ArrowLeft, Save, X } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Save,
+  Package,
+  MapPin,
+  User,
+  Calendar,
+  DollarSign,
+  CheckCircle
+} from 'lucide-react';
 
 interface AddEquipmentProps {
   onBack: () => void;
@@ -30,7 +38,6 @@ const AddEquipment: React.FC<AddEquipmentProps> = ({ onBack, onSubmit }) => {
     
     let parsedValue: string | number = value;
     if (name === 'value') {
-      // Remove non-numeric characters and convert to number
       parsedValue = parseFloat(value.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
     }
     
@@ -39,7 +46,7 @@ const AddEquipment: React.FC<AddEquipmentProps> = ({ onBack, onSubmit }) => {
       [name]: parsedValue
     }));
     
-    // Clear error when field is edited
+    // Clear error when user types
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -47,60 +54,6 @@ const AddEquipment: React.FC<AddEquipmentProps> = ({ onBack, onSubmit }) => {
         return newErrors;
       });
     }
-  };
-
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.assetNumber.trim()) {
-      newErrors.assetNumber = 'O número do patrimônio é obrigatório';
-    }
-    
-    if (!formData.description.trim()) {
-      newErrors.description = 'A descrição é obrigatória';
-    }
-    
-    if (!formData.brand.trim()) {
-      newErrors.brand = 'A marca é obrigatória';
-    }
-    
-    if (!formData.model.trim()) {
-      newErrors.model = 'O modelo é obrigatório';
-    }
-    
-    if (!formData.location.trim()) {
-      newErrors.location = 'A localização é obrigatória';
-    }
-    
-    if (!formData.responsible.trim()) {
-      newErrors.responsible = 'O responsável é obrigatório';
-    }
-    
-    if (!formData.acquisitionDate) {
-      newErrors.acquisitionDate = 'A data de aquisição é obrigatória';
-    }
-    
-    if (formData.value <= 0) {
-      newErrors.value = 'O valor deve ser maior que zero';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validate()) {
-      onSubmit(formData);
-    }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
   };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,266 +64,294 @@ const AddEquipment: React.FC<AddEquipmentProps> = ({ onBack, onSubmit }) => {
       ...prev,
       value: numericValue
     }));
-    
-    // Clear error when field is edited
-    if (errors.value) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.value;
-        return newErrors;
-      });
-    }
   };
 
-  const handleCancel = () => {
-    if (confirm('Tem certeza que deseja cancelar? Os dados não salvos serão perdidos.')) {
-      onBack();
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.assetNumber.trim()) newErrors.assetNumber = 'Obrigatório';
+    if (!formData.description.trim()) newErrors.description = 'Obrigatório';
+    if (!formData.brand.trim()) newErrors.brand = 'Obrigatório';
+    if (!formData.model.trim()) newErrors.model = 'Obrigatório';
+    if (!formData.location.trim()) newErrors.location = 'Obrigatório';
+    if (!formData.responsible.trim()) newErrors.responsible = 'Obrigatório';
+    if (formData.value <= 0) newErrors.value = 'Valor inválido';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (validate()) {
+      onSubmit(formData);
     }
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center">
-        <Button 
-          variant="outline"
-          size="sm"
-          icon={<ArrowLeft size={16} />}
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <button
           onClick={onBack}
-          className="mr-4"
+          className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-4"
         >
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
-        </Button>
-        <h1 className="text-2xl font-bold text-gray-900">Adicionar Novo Equipamento</h1>
+        </button>
+        
+        <h1 className="text-3xl font-bold text-gray-900">Novo Equipamento</h1>
+        <p className="text-gray-600 mt-2">Cadastre um novo equipamento no sistema</p>
       </div>
 
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="font-medium text-gray-900 border-b pb-2">Informações Básicas</h3>
-              
-              <div>
-                <label htmlFor="assetNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                  Número do Patrimônio *
-                </label>
-                <input
-                  type="text"
-                  id="assetNumber"
-                  name="assetNumber"
-                  value={formData.assetNumber}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm 
-                    ${errors.assetNumber 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:border-primary focus:ring-primary'}`}
-                />
-                {errors.assetNumber && (
-                  <p className="mt-1 text-sm text-red-600">{errors.assetNumber}</p>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrição *
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={3}
-                  value={formData.description}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm 
-                    ${errors.description 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:border-primary focus:ring-primary'}`}
-                />
-                {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                  Status *
-                </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                >
-                  <option value="ativo">Ativo</option>
-                  <option value="manutenção">Em Manutenção</option>
-                  <option value="desativado">Desativado</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                  Localização *
-                </label>
-                <input
-                  type="text"
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm 
-                    ${errors.location 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:border-primary focus:ring-primary'}`}
-                />
-                {errors.location && (
-                  <p className="mt-1 text-sm text-red-600">{errors.location}</p>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="responsible" className="block text-sm font-medium text-gray-700 mb-1">
-                  Responsável *
-                </label>
-                <input
-                  type="text"
-                  id="responsible"
-                  name="responsible"
-                  value={formData.responsible}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm 
-                    ${errors.responsible 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:border-primary focus:ring-primary'}`}
-                />
-                {errors.responsible && (
-                  <p className="mt-1 text-sm text-red-600">{errors.responsible}</p>
-                )}
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h3 className="font-medium text-gray-900 border-b pb-2">Detalhes Técnicos</h3>
-              
-              <div>
-                <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-1">
-                  Marca *
-                </label>
-                <input
-                  type="text"
-                  id="brand"
-                  name="brand"
-                  value={formData.brand}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm 
-                    ${errors.brand 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:border-primary focus:ring-primary'}`}
-                />
-                {errors.brand && (
-                  <p className="mt-1 text-sm text-red-600">{errors.brand}</p>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
-                  Modelo *
-                </label>
-                <input
-                  type="text"
-                  id="model"
-                  name="model"
-                  value={formData.model}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm 
-                    ${errors.model 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:border-primary focus:ring-primary'}`}
-                />
-                {errors.model && (
-                  <p className="mt-1 text-sm text-red-600">{errors.model}</p>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="specs" className="block text-sm font-medium text-gray-700 mb-1">
-                  Especificações
-                </label>
-                <textarea
-                  id="specs"
-                  name="specs"
-                  rows={3}
-                  value={formData.specs}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="acquisitionDate" className="block text-sm font-medium text-gray-700 mb-1">
-                  Data de Aquisição *
-                </label>
-                <input
-                  type="date"
-                  id="acquisitionDate"
-                  name="acquisitionDate"
-                  value={formData.acquisitionDate}
-                  onChange={handleChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm 
-                    ${errors.acquisitionDate 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:border-primary focus:ring-primary'}`}
-                />
-                {errors.acquisitionDate && (
-                  <p className="mt-1 text-sm text-red-600">{errors.acquisitionDate}</p>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-1">
-                  Valor *
-                </label>
-                <div className="relative mt-1 rounded-md shadow-sm">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <span className="text-gray-500 sm:text-sm">R$</span>
-                  </div>
-                  <input
-                    type="text"
-                    id="value"
-                    name="value"
-                    value={formatCurrency(formData.value).replace('R$', '').trim()}
-                    onChange={handleValueChange}
-                    className={`block w-full rounded-md pl-12 shadow-sm sm:text-sm 
-                      ${errors.value 
-                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                        : 'border-gray-300 focus:border-primary focus:ring-primary'}`}
-                    placeholder="0,00"
-                  />
-                </div>
-                {errors.value && (
-                  <p className="mt-1 text-sm text-red-600">{errors.value}</p>
-                )}
-              </div>
-            </div>
-          </div>
+      {/* Form Content */}
+      <div className="space-y-8">
+        {/* Identificação */}
+        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Identificação</h2>
           
-          <div className="flex justify-end space-x-3 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              icon={<X size={16} />}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              icon={<Save size={16} />}
-            >
-              Salvar Equipamento
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Número do Patrimônio
+              </label>
+              <input
+                type="text"
+                name="assetNumber"
+                value={formData.assetNumber}
+                onChange={handleChange}
+                placeholder="PAT-2024-001"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.assetNumber ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.assetNumber && (
+                <p className="mt-1 text-xs text-red-600">{errors.assetNumber}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              >
+                <option value="ativo">Ativo</option>
+                <option value="manutenção">Em Manutenção</option>
+                <option value="desativado">Desativado</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Descrição
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Descreva o equipamento..."
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.description ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.description && (
+                <p className="mt-1 text-xs text-red-600">{errors.description}</p>
+              )}
+            </div>
           </div>
-        </form>
-      </Card>
+        </section>
+
+        {/* Localização e Responsável */}
+        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Localização e Responsável</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <MapPin className="inline h-4 w-4 mr-1" />
+                Localização
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="Sala 101, Prédio A"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.location ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.location && (
+                <p className="mt-1 text-xs text-red-600">{errors.location}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <User className="inline h-4 w-4 mr-1" />
+                Responsável
+              </label>
+              <input
+                type="text"
+                name="responsible"
+                value={formData.responsible}
+                onChange={handleChange}
+                placeholder="Nome do responsável"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.responsible ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.responsible && (
+                <p className="mt-1 text-xs text-red-600">{errors.responsible}</p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Informações Técnicas */}
+        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Informações Técnicas</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Package className="inline h-4 w-4 mr-1" />
+                Marca
+              </label>
+              <input
+                type="text"
+                name="brand"
+                value={formData.brand}
+                onChange={handleChange}
+                placeholder="Dell, HP, Lenovo..."
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.brand ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.brand && (
+                <p className="mt-1 text-xs text-red-600">{errors.brand}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Modelo
+              </label>
+              <input
+                type="text"
+                name="model"
+                value={formData.model}
+                onChange={handleChange}
+                placeholder="OptiPlex 7090"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.model ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.model && (
+                <p className="mt-1 text-xs text-red-600">{errors.model}</p>
+              )}
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Especificações
+              </label>
+              <textarea
+                name="specs"
+                value={formData.specs}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Processador, memória, armazenamento... (opcional)"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Informações Financeiras */}
+        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Informações Financeiras</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Calendar className="inline h-4 w-4 mr-1" />
+                Data de Aquisição
+              </label>
+              <input
+                type="date"
+                name="acquisitionDate"
+                value={formData.acquisitionDate}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <DollarSign className="inline h-4 w-4 mr-1" />
+                Valor
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
+                <input
+                  type="text"
+                  name="value"
+                  value={formatCurrency(formData.value).replace('R$', '').trim()}
+                  onChange={handleValueChange}
+                  placeholder="0,00"
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                    errors.value ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+              {errors.value && (
+                <p className="mt-1 text-xs text-red-600">{errors.value}</p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Success Preview */}
+        {Object.keys(errors).length === 0 && formData.assetNumber && formData.description && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start">
+            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
+            <div className="text-sm text-green-800">
+              <p className="font-medium">Pronto para salvar!</p>
+              <p className="mt-1">Todos os campos obrigatórios foram preenchidos corretamente.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex justify-end gap-4 pt-6 pb-8">
+          <Button
+            variant="outline"
+            onClick={onBack}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            icon={<Save className="h-4 w-4" />}
+          >
+            Salvar Equipamento
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,9 +1,10 @@
-import { Equipment, HistoryEntry } from '../types';
+import { Equipment, HistoryEntry, Attachment } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Mock storage using localStorage
 const EQUIPMENT_KEY = 'inventory_equipment';
 const HISTORY_KEY = 'inventory_history';
+const ATTACHMENTS_KEY = 'inventory_attachments';
 
 // Sample data for initial population
 const sampleEquipment: Omit<Equipment, 'id'>[] = [
@@ -86,6 +87,15 @@ const getStoredHistory = (): HistoryEntry[] => {
 
 const setStoredHistory = (history: HistoryEntry[]): void => {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+};
+
+const getStoredAttachments = (): Attachment[] => {
+  const data = localStorage.getItem(ATTACHMENTS_KEY);
+  return data ? JSON.parse(data) : [];
+};
+
+const setStoredAttachments = (attachments: Attachment[]): void => {
+  localStorage.setItem(ATTACHMENTS_KEY, JSON.stringify(attachments));
 };
 
 // Add history entry
@@ -221,6 +231,11 @@ const inventoryService = {
           const updatedEquipment = equipment.filter(item => item.id !== id);
           setStoredEquipment(updatedEquipment);
           
+          // Also remove all attachments for this equipment
+          const attachments = getStoredAttachments();
+          const remainingAttachments = attachments.filter(a => a.equipmentId !== id);
+          setStoredAttachments(remainingAttachments);
+          
           resolve();
         } catch (error) {
           reject(error);
@@ -277,6 +292,112 @@ const inventoryService = {
         
         resolve();
       }, 500);
+    });
+  },
+
+  // Get equipment attachments
+  getEquipmentAttachments: async (equipmentId: string): Promise<Attachment[]> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const attachments = getStoredAttachments();
+        const equipmentAttachments = attachments.filter(
+          attachment => attachment.equipmentId === equipmentId
+        );
+        resolve(equipmentAttachments);
+      }, 300);
+    });
+  },
+
+  // Upload attachment
+  uploadAttachment: async (equipmentId: string, file: File, user: string): Promise<Attachment> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const attachments = getStoredAttachments();
+        
+        // Create file URL (in a real app, this would upload to a server)
+        const fileUrl = URL.createObjectURL(file);
+        
+        const newAttachment: Attachment = {
+          id: uuidv4(),
+          equipmentId,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: fileUrl,
+          uploadedBy: user,
+          uploadedAt: new Date().toISOString()
+        };
+        
+        attachments.push(newAttachment);
+        setStoredAttachments(attachments);
+        
+        // Add history entry
+        addHistoryEntry({
+          equipmentId,
+          user,
+          changeType: 'anexou arquivo',
+          newValue: file.name
+        });
+        
+        resolve(newAttachment);
+      }, 500);
+    });
+  },
+
+  // Delete attachment
+  deleteAttachment: async (attachmentId: string, user: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          const attachments = getStoredAttachments();
+          const attachmentIndex = attachments.findIndex(a => a.id === attachmentId);
+          
+          if (attachmentIndex === -1) {
+            reject(new Error('Anexo não encontrado'));
+            return;
+          }
+          
+          const attachment = attachments[attachmentIndex];
+          
+          // Add history entry
+          addHistoryEntry({
+            equipmentId: attachment.equipmentId,
+            user,
+            changeType: 'removeu arquivo',
+            oldValue: attachment.name
+          });
+          
+          // Remove attachment
+          attachments.splice(attachmentIndex, 1);
+          setStoredAttachments(attachments);
+          
+          // Revoke the object URL to free memory
+          if (attachment.url.startsWith('blob:')) {
+            URL.revokeObjectURL(attachment.url);
+          }
+          
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      }, 500);
+    });
+  },
+
+  // Download attachment
+  downloadAttachment: async (attachment: Attachment): Promise<void> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Create a download link
+        const link = document.createElement('a');
+        link.href = attachment.url;
+        link.download = attachment.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        resolve();
+      }, 100);
     });
   }
 };

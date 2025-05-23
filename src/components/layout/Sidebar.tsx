@@ -3,7 +3,6 @@ import {
   Home, 
   Laptop, 
   FileText, 
-  Settings,
   PlusCircle,
   LogOut,
   HelpCircle,
@@ -49,12 +48,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, activeRoute, onNavigate, onCl
       route: 'reports',
       description: 'Análises e dados'
     },
-    { 
-      name: 'Configurações', 
-      icon: <Settings size={20} />, 
-      route: 'settings',
-      description: 'Preferências'
-    },
   ];
 
   return (
@@ -68,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, activeRoute, onNavigate, onCl
           {/* Header */}
           <div className="flex items-center justify-between h-20 px-5 border-b border-secondary-light bg-secondary/95 backdrop-blur-sm">
             <div className="flex items-center">
-              <img src="../images/logo.png" alt="Logo" className="h-12 w-auto"/>
+              <img src="../images/logo.png" alt="Logo" />
               <span className="ml-2 text-lg font-semibold text-white"></span>
             </div>
             <button
@@ -123,6 +116,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, activeRoute, onNavigate, onCl
                 </div>
               ))}
             </div>
+            </nav>
 
             {/* Support Section */}
             <div className="mt-8 pt-6 border-t border-secondary-light">
@@ -139,10 +133,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, activeRoute, onNavigate, onCl
                 </button>
               </div>
             </div>
-          </nav>
 
           {/* User Profile */}
           <div className="p-4 border-t border-secondary-light bg-secondary-light/30">
+
             <div className="flex items-center space-x-3 mb-4 p-3 rounded-lg bg-secondary-light/50">
               <div className="relative">
                 <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">

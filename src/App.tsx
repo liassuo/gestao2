@@ -14,7 +14,7 @@ import inventoryService from './services/inventoryService';
 import { Wifi, WifiOff } from 'lucide-react';
 
 // Tipos para rotas
-type RouteType = 'dashboard' | 'equipment' | 'equipment-details' | 'add-equipment' | 'edit-equipment' | 'reports' | 'inventory' | 'construction' | 'settings';
+type RouteType = 'dashboard' | 'equipment' | 'equipment-details' | 'add-equipment' | 'edit-equipment' | 'reports' | 'inventory' | 'construction';
 
 function App() {
   // Estados principais
@@ -242,14 +242,6 @@ function App() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <h3 className="text-2xl font-semibold text-gray-700 mb-2">Equipamentos em Obras</h3>
-            <p className="text-gray-500">Esta funcionalidade está em desenvolvimento</p>
-          </div>
-        </div>
-      ),
-      settings: (
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <h3 className="text-2xl font-semibold text-gray-700 mb-2">Configurações</h3>
             <p className="text-gray-500">Esta funcionalidade está em desenvolvimento</p>
           </div>
         </div>

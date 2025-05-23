@@ -17,10 +17,21 @@ export interface HistoryEntry {
   equipmentId: string;
   timestamp: string;
   user: string;
-  changeType: 'criou' | 'editou' | 'excluiu' | 'alterou status';
+  changeType: 'criou' | 'editou' | 'excluiu' | 'alterou status' | 'anexou arquivo' | 'removeu arquivo';
   field?: string;
   oldValue?: string;
   newValue?: string;
 }
 
-export type ToastType = 'success' | 'error' | 'info';
+export interface Attachment {
+  id: string;
+  equipmentId: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
+export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'loading';
